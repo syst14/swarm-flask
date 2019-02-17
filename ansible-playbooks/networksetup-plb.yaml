@@ -1,0 +1,68 @@
+---
+
+- name: Network basic setup
+  hosts: "{{ hosts }}"
+  become: yes
+
+  vars:
+    sshd_config: "/etc/ssh/sshd_config"
+    epel_repo_url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
+    epel_repo_gpg_key_url: "https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}"
+    epel_repofile_path: "/etc/yum.repos.d/epel.repo"
+    ufw_config_path: "/etc/ufw/ufw.conf"
+
+  tasks:
+    - name: Restrict root.
+      lineinfile: dest={{ sshd_config }} regexp="^#?PermitRootLogin" line="PermitRootLogin no"
+      notify: Restart sshd
+    
+    - name: Check EPEL repo.
+      stat: path={{ epel_repofile_path }}
+      register: epel_repofile_result
+ 
+    - name: Install EPEL repo.
+      yum:
+        name: "{{ epel_repo_url }}"
+        state: present
+      when: not epel_repofile_result.stat.exists
+ 
+    - name: Import EPEL GPG key.
+      rpm_key:
+        key: "{{ epel_repo_gpg_key_url }}"
+        state: present
+      when: not epel_repofile_result.stat.exists
+
+    - name: Install network tools
+      yum:
+        name: "{{ packages }}"
+      vars:
+        packages:
+        - net-tools
+        - htop
+        - nslookup
+        - telnet
+
+    - name: Check firewall installed.
+      stat: path={{ ufw_config_path }}
+      register: ufw_state
+
+    - name: Install firewall.
+      yum: name=ufw state=latest
+      when: not ufw_state.stat.exists
+
+    - name: Enable ufw with default policy
+      ufw:
+        state: enabled
+
+    - name: Allow all access to port 22
+      ufw:
+        rule: allow
+        port: "{{ item }}"
+      with_items:
+        - 22
+        - 80
+        - 443
+
+  handlers:
+  - name: Restart sshd
+    service: name=sshd state=restarted

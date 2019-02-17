@@ -1,0 +1,15 @@
+- name: Deploy App
+  hosts: manager
+  become: True
+  gather_facts: False
+
+  vars:
+    app_name: 'flask-app'
+    image_name: 'syst14/flask-app'
+
+  tasks:
+    - name: Update app service
+      shell: docker pull "{{ image_name }}"
+      
+    - name: Update app service
+      shell: docker service update --image "{{ image_name }}""  --force "{{ app_name }}""
