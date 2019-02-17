@@ -1,0 +1,15 @@
+[Unit]
+Description=Jenkins container
+After=docker.service
+Wants=network-online.target docker.socket
+Requires=docker.socket
+
+[Service]
+Restart=always
+ExecStartPre=/bin/bash -c "/usr/bin/docker container inspect jenkins> /dev/null || /usr/bin/docker run -d -v /opt/docker_volumes/jenkins/:/var/jenkins_home \
+-p 8443:8443 --name jenkins localhost:5000/jenkins:latest --httpPort=-1 --httpsPort=8443 --httpsKeyStore=/var/jenkins_home/jenkins_keystore.jks --httpsKeyStorePassword=mypwd14"
+ExecStart=/usr/bin/docker start -a jenkins
+ExecStop=/usr/bin/docker stop jenkins
+
+[Install]
+WantedBy=multi-user.target
