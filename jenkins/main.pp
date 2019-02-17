@@ -44,15 +44,3 @@ exec { 'root login off':
   require => File['/etc/ssh/sshd_config']
   user => root
 }
-
-####
-net-tools
-openssh-server
-sudo sed -i "s|#PermitRootLogin yes|PermitRootLogin no|g" /etc/ssh/sshd_config
-sudo yum install epel-release -y
-sudo yum install ufw
-sudo ufw enable
-sudo ufw allow 22
-sudo ufw allow 80
-sudo ufw allow 443
-#PermitRootLogin yes
