@@ -100,9 +100,3 @@ if __name__ == '__main__':
         sys.exit(1)
 
     app.run(host='0.0.0.0', port=int(args.port), debug=True)
-
-#requirments 
-# Flask>=0.9
-# flask_marshmallow
-# flask_sqlalchemy
-# pymysql
