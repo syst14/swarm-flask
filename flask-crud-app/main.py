@@ -26,7 +26,7 @@ class SneakersSchema(ma.Schema):
         fields = ('brand', 'model')
 
 try:
-    all = Users.query.all()
+    all = Sneakers.query.all()
     db_status = 'OK'
 except Exception as e:
     try:
